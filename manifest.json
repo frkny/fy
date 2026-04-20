@@ -1,0 +1,19 @@
+{
+  "name": "Ballz Blast",
+  "short_name": "BallzBlast",
+  "description": "Top fırlat, blokları kır! Instagram tarzı bağımlılık yapan mobil oyun.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#07071a",
+  "theme_color": "#0a0a1f",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["games", "entertainment"]
+}
