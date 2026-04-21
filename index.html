@@ -404,9 +404,13 @@ function drawAimLine(tx, ty) {
 // ─────────────── SHOOTING ───────────────
 function shoot(tx, ty) {
   if (shooting) return;
-  const dx = tx - launchX, dy = ty - (BOTTOM_Y - BALL_R);
+  const dx = tx - launchX;
+  // Force upward direction; if tap is at or below launcher, aim straight up
+  let dy = ty - (BOTTOM_Y - BALL_R);
+  if (dy >= -30) dy = -120;
+
   const len = Math.sqrt(dx*dx + dy*dy);
-  if (len < 20 || dy >= -10) return;
+  if (len < 5) return;
 
   const vx = (dx/len)*BALL_SPD, vy = (dy/len)*BALL_SPD;
   shooting = true;
@@ -816,13 +820,18 @@ function loop() {
 function getPos(e) {
   const rect = canvas.getBoundingClientRect();
   const sx = W / rect.width, sy = H / rect.height;
-  const src = e.touches ? e.touches[0] : e;
+  // touchend fires with empty touches[] — use changedTouches instead
+  const src = e.changedTouches ? e.changedTouches[0]
+             : e.touches && e.touches[0] ? e.touches[0]
+             : e;
+  if (!src) return null;
   return { x: (src.clientX - rect.left)*sx, y: (src.clientY - rect.top)*sy };
 }
 
 function onDown(e) {
   e.preventDefault();
   const p = getPos(e);
+  if (!p) return;
   if (gameState === 'MENU') {
     if (p.x > W/2-110 && p.x < W/2+110 && p.y > H/2+55 && p.y < H/2+117) startGame();
   } else if (gameState === 'GAMEOVER') {
@@ -835,13 +844,15 @@ function onDown(e) {
 
 function onMove(e) {
   e.preventDefault();
-  if (gameState === 'PLAYING' && !shooting) aimPos = getPos(e);
+  const p = getPos(e);
+  if (p && gameState === 'PLAYING' && !shooting) aimPos = p;
 }
 
 function onUp(e) {
   e.preventDefault();
   if (gameState === 'PLAYING' && !shooting && aimPos) {
-    const p = getPos(e);
+    // use changedTouches position, fallback to last aimPos
+    const p = getPos(e) || aimPos;
     shoot(p.x, p.y);
     aimPos = null;
   }
